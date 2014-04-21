@@ -1,6 +1,6 @@
 (function() {
 
-  var exports = typeof exports == "undefined" ? window : exports;
+  var exports = typeof exports != "undefined" ? exports : typeof window != "undefined" ? window : {};
 
   var templates = {},
       rAmp = /&/g,
@@ -10,6 +10,30 @@
       rQuot = /\"/g,
       escabable = /[&<>\"\']/,
       modifiers = {};
+
+  /**
+     * Safely fetches the requested value from a deep hash.
+     * Usable to bypass nullchecks.
+     * e.g.:
+     * JSONutils.get({a: { b: { c: "foo" }}, "a.b.c"); ---> "foo"
+     * JSONutils.get({a: { b: { c: "foo" }}, "a.b.c.d.e"); ---> undefined
+     * @param obj
+     * @param key
+     */
+  function get(obj, key) {
+    var path = key.split("."),
+        item = obj;
+    for(var i=0, l=path.length; i<l; i++) {
+      item = item[path[i]];
+      if(!item)
+        return item;
+    }
+    return item;
+  }
+
+  function isFunction(value) {
+    return (value && value.constructor) == Function;
+  }
 
   exports.TinyTemplate = {
 
@@ -42,6 +66,24 @@
       }
     },
 
+    renderAsync: function(template, values, callback) {
+      var worker = new Worker("/tinytemplate.js"),
+          result = "";
+      worker.addEventListener('error', function(e) {
+        console.error(e);
+      }, false);
+      worker.addEventListener('message', function(e) {
+        switch (e.data.event) {
+          case 'render': 
+            result += e.data.result
+            break;
+          case 'done': 
+            callback(result)
+        }
+      }, false);
+      worker.postMessage({'template': template, 'values': values})
+    },
+
     /**
      * render('my-template', {foo: "bar"})
      * render('my-template', [{foo: "bar"}, {foo: "baz"}])
@@ -49,7 +91,7 @@
      * render($('#my-template'), {foo: "bar"})
      */
     render: function (template, values) {
-      if($.isArray(values)) {
+      if(values && values.constructor == Array) {
         var result = "";
         for(var i=0, l=values.length; i<l; i++) {
           result += this.render(template, values[i]);
@@ -58,7 +100,7 @@
       } 
 
       else {
-        var t = template.constructor == $ ? template.html() : template + "",
+        var t = template.constructor == exports.$ ? template.html() : isFunction(template) ? template(values) : template + "",
             builtTemplate = this.build(t),
             result = [];
 
@@ -76,8 +118,8 @@
 
             //if value is empty, don't render the next block
             else if(key[0] == "?") {
-              value = JSONUtils.get(values, builtTemplate[i].slice(1));
-              value = $.isFunction(value) ? value() : value;
+              value = get(values, builtTemplate[i].slice(1));
+              value = isFunction(value) ? value() : value;
               if(StringUtils.empty(value)) {
                 while(builtTemplate[i] != "/") {
                   i++;
@@ -88,8 +130,8 @@
 
             //if value is empty, render the next block
             else if(key[0] == "!") {
-              value = JSONUtils.get(values, builtTemplate[i].slice(1));
-              value = $.isFunction(value) ? value() : value;
+              value = get(values, builtTemplate[i].slice(1));
+              value = isFunction(value) ? value() : value;
               if(!StringUtils.empty(value)) {
                 while(builtTemplate[i] != "/") {
                   i++;
@@ -103,14 +145,14 @@
             }
 
             else if(key[0] == "&") {
-              value = JSONUtils.get(values, key.slice(1));
+              value = get(values, key.slice(1));
             } 
 
             else {
-              value = JSONUtils.get(values, key);
+              value = get(values, key);
             }
 
-            if($.isFunction(value)) {
+            if(isFunction(value)) {
               value = value()
             }
 
@@ -139,5 +181,22 @@
 
   }
 
+  //if(typeof Worker != "undefined") {
+    self.addEventListener('message', function(e) {
+      self.postMessage(e.data);
+      var msg = e.data,
+          template = msg.template,
+          values = msg.values,
+          result;
+      if(values && values.constructor != Array) {
+        values = [values]
+      }
+      for(var i=0, l=values.length; i<l; i++) {
+        result = exports.TinyTemplate.render(template, values[i]);
+        self.postMessage({'event': 'render', 'result': result})
+      }
+      self.postMessage({'event': 'done'})
+    }, false);
+  //}
 
 }());
