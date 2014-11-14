@@ -1,0 +1,62 @@
+<DocType!>
+<html>
+<head>
+  <title>Tiny Template test</title>
+</head>
+<body>
+  <div>
+    <button id="renderSync">Render Synch</button>
+    <button id="renderAsync">Render Asynch</button>
+    <span id="time"></span>
+    <span id="result"></span>
+  </div>
+  <div id="container"></div>
+<script src="tinytemplate.js"></script>
+<script>
+  var template = "".concat(
+    "<div>",
+      "<span>Hello from {name}</span>",
+      "<span>I think life is {life}</span>",
+      "<span>But is sucks because I'm a {creature}</span>",
+      "<span>Whereas you're a {type}</span>",
+      "<span>So {verb} it</span>",
+    "</div>"
+  )
+  var values = [];
+  for(var i=0; i<15000; i++) {
+    values.push({
+      name: ["Bill", "Lucy", "Paul", "Mary"][Math.floor(Math.random()*4)],
+      life: ["Shitty", "Wonderful", "Crappy", "Great ah !"][Math.floor(Math.random()*4)],
+      creature: ["Dog", "Cat", "Kite", "dragon"][Math.floor(Math.random()*4)],
+      type: ["Kitten", "Cow", "Horse", "Beauty"][Math.floor(Math.random()*4)],
+      vers: ["Moo", "Foo", "Bar", "Screw"][Math.floor(Math.random()*4)]
+    })
+  }
+
+  var time = document.getElementById("time")
+  setInterval(function() {
+    var d = new Date();
+    time.innerHTML = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds() + "." + d.getMilliseconds();
+  }, 100)
+
+  document.getElementById("renderSync").onclick = renderSync
+  document.getElementById("renderAsync").onclick = renderAsync
+
+  function renderSync() {
+    var s = new Date().getTime();
+    var result = TinyTemplate.render(template, values)
+    document.getElementById("container").innerHTML = result
+    document.getElementById("result").innerHTML = new Date().getTime() - s  + " milliseconds"
+  }
+
+  function renderAsync() {
+    var s = new Date().getTime();
+    TinyTemplate.renderAsync(template, values, function(result) {
+      document.getElementById("container").innerHTML = result
+      document.getElementById("result").innerHTML = new Date().getTime() - s  + " milliseconds"
+    })
+  }
+
+</script>
+</body>
+</html>
