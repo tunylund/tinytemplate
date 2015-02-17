@@ -113,7 +113,13 @@
             var mod = modifiers[key.split(".")[0]];
 
             if(mod) {
-              value = mod(key, values)
+              var scope = {
+                i: i,
+                builtTemplate: builtTemplate,
+                result: result
+              };
+              value = mod(key, values, scope);
+              i = scope.i;
             }
 
             //if value is empty, don't render the next block
@@ -181,7 +187,7 @@
 
   }
 
-  //if(typeof Worker != "undefined") {
+  /*if(typeof Worker != "undefined") {
     self.addEventListener('message', function(e) {
       self.postMessage(e.data);
       var msg = e.data,
@@ -197,6 +203,6 @@
       }
       self.postMessage({'event': 'done'})
     }, false);
-  //}
+  }*/
 
 }());
