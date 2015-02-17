@@ -66,24 +66,6 @@
       }
     },
 
-    renderAsync: function(template, values, callback) {
-      var worker = new Worker("/tinytemplate.js"),
-          result = "";
-      worker.addEventListener('error', function(e) {
-        console.error(e);
-      }, false);
-      worker.addEventListener('message', function(e) {
-        switch (e.data.event) {
-          case 'render': 
-            result += e.data.result
-            break;
-          case 'done': 
-            callback(result)
-        }
-      }, false);
-      worker.postMessage({'template': template, 'values': values})
-    },
-
     /**
      * render('my-template', {foo: "bar"})
      * render('my-template', [{foo: "bar"}, {foo: "baz"}])
@@ -186,23 +168,5 @@
     }
 
   }
-
-  /*if(typeof Worker != "undefined") {
-    self.addEventListener('message', function(e) {
-      self.postMessage(e.data);
-      var msg = e.data,
-          template = msg.template,
-          values = msg.values,
-          result;
-      if(values && values.constructor != Array) {
-        values = [values]
-      }
-      for(var i=0, l=values.length; i<l; i++) {
-        result = exports.TinyTemplate.render(template, values[i]);
-        self.postMessage({'event': 'render', 'result': result})
-      }
-      self.postMessage({'event': 'done'})
-    }, false);
-  }*/
-
+  
 }());
