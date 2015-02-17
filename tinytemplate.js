@@ -66,24 +66,6 @@
       }
     },
 
-    renderAsync: function(template, values, callback) {
-      var worker = new Worker("/tinytemplate.js"),
-          result = "";
-      worker.addEventListener('error', function(e) {
-        console.error(e);
-      }, false);
-      worker.addEventListener('message', function(e) {
-        switch (e.data.event) {
-          case 'render': 
-            result += e.data.result
-            break;
-          case 'done': 
-            callback(result)
-        }
-      }, false);
-      worker.postMessage({'template': template, 'values': values})
-    },
-
     /**
      * render('my-template', {foo: "bar"})
      * render('my-template', [{foo: "bar"}, {foo: "baz"}])
@@ -183,11 +165,34 @@
         return result.join("");
       }
 
+    },
+
+    renderAsync: function(template, values, callback) {
+      if (!window.Worker) {
+        callback(this.render(template, values))
+      } else {
+        var worker = new Worker("/tinytemplate.js"),
+            result = "";
+        worker.addEventListener('error', function(e) {
+          console.error(e);
+        }, false);
+        worker.addEventListener('message', function(e) {
+          console.log(e)
+          switch (e.data.event) {
+            case 'render': 
+              result += e.data.result
+              break;
+            case 'done': 
+              callback(result)
+          }
+        }, false);
+        worker.postMessage({'template': template, 'values': values})
+      }
     }
 
   }
 
-  /*if(typeof Worker != "undefined") {
+  if(typeof Worker != "undefined") {
     self.addEventListener('message', function(e) {
       self.postMessage(e.data);
       var msg = e.data,
@@ -203,6 +208,6 @@
       }
       self.postMessage({'event': 'done'})
     }, false);
-  }*/
+  }
 
 }());
