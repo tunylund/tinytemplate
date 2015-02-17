@@ -20,7 +20,7 @@
      * @param obj
      * @param key
      */
-  function get(obj, key) {
+  function get (obj, key) {
     var path = key.split("."),
         item = obj;
     for(var i=0, l=path.length; i<l; i++) {
@@ -31,8 +31,12 @@
     return item;
   }
 
-  function isFunction(value) {
+  function isFunction (value) {
     return (value && value.constructor) == Function;
+  }
+
+  function empty (str) {
+    return !str || (str.length && str.length === 0) || (str.replace && str.replace(/ /g, "") == "")
   }
 
   exports.TinyTemplate = {
@@ -108,7 +112,7 @@
             else if(key[0] == "?") {
               value = get(values, builtTemplate[i].slice(1));
               value = isFunction(value) ? value() : value;
-              if(StringUtils.empty(value)) {
+              if(empty(value)) {
                 while(builtTemplate[i] != "/") {
                   i++;
                 }
@@ -120,7 +124,7 @@
             else if(key[0] == "!") {
               value = get(values, builtTemplate[i].slice(1));
               value = isFunction(value) ? value() : value;
-              if(!StringUtils.empty(value)) {
+              if(!empty(value)) {
                 while(builtTemplate[i] != "/") {
                   i++;
                 }
