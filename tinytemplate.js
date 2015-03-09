@@ -36,7 +36,7 @@
   }
 
   function empty (str) {
-    return !str || (str.length && str.length === 0) || (str.replace && str.replace(/ /g, "") == "")
+    return !str || str.length === 0 || (str.replace && str.replace(/ /g, "") == "")
   }
 
   exports.TinyTemplate = {
