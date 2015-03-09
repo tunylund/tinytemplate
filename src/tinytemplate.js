@@ -74,6 +74,7 @@
      * render('my-template', {foo: "bar"})
      * render('my-template', [{foo: "bar"}, {foo: "baz"}])
      * render('<div>{foo}</div>', {foo: "bar"})
+     * render(function(values){return '<div>{foo}</div>';}, {foo: "bar"})
      * render($('#my-template'), {foo: "bar"})
      */
     render: function (template, values) {
@@ -94,7 +95,7 @@
           var key = builtTemplate[i], value = "";
           if(i%2==0) {
             result.push(key);
-          }else {
+          } else {
 
             var mod = modifiers[key.split(".")[0]];
 

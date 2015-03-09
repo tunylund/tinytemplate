@@ -1,0 +1,35 @@
+{
+  "name": "tinytemplate",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A tiny template solution. nothing fancy to see here.",
+  "main": "tinytemplate.js",
+  "scripts": {
+    "test": "karma start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tunylund/tinytemplate.git"
+  },
+  "keywords": [
+    "javascript",
+    "template"
+  ],
+  "author": "Tuomas Nylund",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tunylund/tinytemplate/issues"
+  },
+  "homepage": "https://github.com/tunylund/tinytemplate",
+  "devDependencies": {
+    "karma": "^0.12.31",
+    "karma-chrome-launcher": "^0.1.7",
+    "karma-mocha": "^0.1.10",
+    "mocha": "^2.2.0"
+  },
+  "dependencies": {
+    "chai": "^2.1.1",
+    "karma-chai": "^0.1.0",
+    "karma-phantomjs-launcher": "^0.1.4"
+  }
+}
